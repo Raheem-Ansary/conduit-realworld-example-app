@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: conduit-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-conduit}
+      POSTGRES_USER: ${POSTGRES_USER:-conduit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-conduit}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: conduit-backend
+    environment:
+      NODE_ENV: ${BACKEND_NODE_ENV:-production}
+      PORT: ${BACKEND_PORT:-3001}
+      PROD_DB_USERNAME: ${POSTGRES_USER:-conduit}
+      PROD_DB_PASSWORD: ${POSTGRES_PASSWORD:-conduit}
+      PROD_DB_NAME: ${POSTGRES_DB:-conduit}
+      PROD_DB_HOSTNAME: db
+      PROD_DB_DIALECT: postgres
+      PROD_DB_LOGGING: "false"
+      JWT_KEY: ${JWT_SECRET:-supersecretkey_example}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/api/tags || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    container_name: conduit-frontend
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+
+volumes:
+  db-data:

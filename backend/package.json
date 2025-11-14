@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "node --watch index.js",
     "sqlz": "npx sequelize-cli",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "npx vitest backend",
+    "build": "echo \"No build step required for backend\""
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
@@ -15,9 +17,7 @@
     "jsonwebtoken": "^9.0.0",
     "pg": "^8.10.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.29.3"
-  },
-  "devDependencies": {
+    "sequelize": "^6.29.3",
     "sequelize-cli": "^6.6.0"
   }
 }

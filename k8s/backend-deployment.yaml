@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conduit-backend
+  namespace: conduit
+  labels:
+    app: conduit-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conduit-backend
+  template:
+    metadata:
+      labels:
+        app: conduit-backend
+    spec:
+      containers:
+        - name: backend
+          image: your-dockerhub-username/conduit-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3001
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: conduit-config
+                  key: BACKEND_NODE_ENV
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: conduit-config
+                  key: BACKEND_PORT
+            - name: PROD_DB_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: conduit-config
+                  key: DB_HOST
+            - name: PROD_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: conduit-config
+                  key: DB_NAME
+            - name: PROD_DB_DIALECT
+              valueFrom:
+                configMapKeyRef:
+                  name: conduit-config
+                  key: DB_DIALECT
+            - name: PROD_DB_LOGGING
+              valueFrom:
+                configMapKeyRef:
+                  name: conduit-config
+                  key: DB_LOGGING
+            - name: PROD_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: conduit-secrets
+                  key: DB_USERNAME
+            - name: PROD_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: conduit-secrets
+                  key: DB_PASSWORD
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: conduit-secrets
+                  key: JWT_KEY
+          livenessProbe:
+            httpGet:
+              path: /api/tags
+              port: 3001
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/tags
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+

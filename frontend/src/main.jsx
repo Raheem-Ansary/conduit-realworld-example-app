@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HashRouter, Route, Routes } from "react-router-dom";
+import axios from "axios";
 import App from "./App";
 import AuthProvider from "./context/AuthContext";
 import "./index.css";
@@ -17,6 +18,16 @@ import ProfileArticles from "./routes/Profile/ProfileArticles";
 import ProfileFavArticles from "./routes/Profile/ProfileFavArticles";
 import Settings from "./routes/Settings";
 import SignUp from "./routes/SignUp";
+
+const envBase = import.meta.env.VITE_API_BASE_URL;
+const apiBaseUrl =
+  envBase && envBase.trim().length > 0
+    ? envBase.replace(/\/+$/, "")
+    : "";
+
+if (apiBaseUrl) {
+  axios.defaults.baseURL = apiBaseUrl;
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
