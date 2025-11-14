@@ -3,7 +3,7 @@ FROM node:18-alpine AS deps
 WORKDIR /usr/src/app/backend
 
 # Install only production dependencies for the backend (includes sequelize-cli)
-COPY backend/package*.json ./
+COPY package*.json ./
 RUN npm install --only=production
 
 FROM node:18-alpine AS runtime
@@ -21,7 +21,7 @@ RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs
 
 # Copy dependencies and source code
 COPY --from=deps /usr/src/app/backend/node_modules ./node_modules
-COPY backend/ ./
+COPY backend . ./
 
 RUN chmod +x docker-entrypoint.sh
 
